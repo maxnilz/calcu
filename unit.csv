@@ -1,0 +1,22 @@
+abbr,name,dimension,si,sifactor,sioffset
+N.m,Newton Meter,Energy,N.m,1,0
+J,Joule,Energy,N.m,1,0
+cal,Calorie,Energy,N.m,4.184,0
+kj,Kilojoule,Energy,N.m,1000,0
+Mj,Megajoule,Energy,N.m,1000000,0
+Gj,Gigajoule,Energy,N.m,1000000000,0
+Tj,Terajoule,Energy,N.m,1.00E+12,0
+g,Gram,Mass,kg,0.001,0
+lb,Pound,Mass,kg,0.45359237,0
+kg,Kilogram,Mass,kg,1,0
+d.m.,Dry Matter,Mass,kg,1,0
+Mg,Megagram,Mass,kg,1000,0
+t,Tonne,Mass,kg,1000,0
+Gg,Gigagram,Mass,kg,1000000,0
+Mt,Megatonne,Mass,kg,1000000000,0
+ltr,Liter,Volume,m3,0.001,0
+gal,Gallon,Volume,m3,0.00454609,0
+m3,Cubic Metre,Volume,m3,1,0
+10^3m3,Kilo Cubic Meter,Volume,m3,1000,0
+10^6m3,Mega Cubic Meter,Volume,m3,1000000,0
+10^9m3,Giga Cubic Metere ,Volume,m3,1000000000,0
