@@ -1,7 +1,7 @@
 # calcu
 
-A unit awared yacc based calculator/interpreter that is designed for calculation green house gases emissions in a
-generic way.
+A unit of measure aware & yacc-based calculator/interpreter designed for generically calculating greenhouse gas
+emissions.
 
 ## How to use
 
@@ -48,7 +48,7 @@ print(CO2, CH2, N2O, GHG);
 }
 ```
 
-## Build 
+## Build
 
 1. download goyacc
     ```bash
