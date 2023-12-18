@@ -1,10 +1,11 @@
 package calcu
 
 import (
-	"github.com/shopspring/decimal"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/shopspring/decimal"
 )
 
 func TestMeasureValueFromString(t *testing.T) {
