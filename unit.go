@@ -17,6 +17,7 @@ type UnitManager interface {
 	// IsUnit check if the given s is a unit
 	IsUnit(s string) bool
 	GetByName(name string) (Unit, bool)
+	ListMetaUnitsByDims(dim ...Dimension) ([]*MetaUnit, error)
 }
 
 type Dimension int
@@ -46,6 +47,7 @@ func DimensionFromString(s string) Dimension {
 
 type Unit interface {
 	Name() string
+	Label() string
 	Dimension() Dimension
 	IsMeta() bool
 	SiName() string
@@ -63,6 +65,10 @@ type MetaUnit struct {
 
 func (u *MetaUnit) Name() string {
 	return u.name
+}
+
+func (u *MetaUnit) Label() string {
+	return u.label
 }
 
 func (u *MetaUnit) Dimension() Dimension {
@@ -108,6 +114,10 @@ func (u *CompoundUnit) Name() string {
 	return fmt.Sprintf("%s/%s", u.Numerator.name, u.Denominator.name)
 }
 
+func (u *CompoundUnit) Label() string {
+	return u.Name()
+}
+
 func (u *CompoundUnit) Dimension() Dimension {
 	return DimInvalid
 }
@@ -124,8 +134,8 @@ func (u *CompoundUnit) SiFactors() (decimal.Decimal, decimal.Decimal) {
 	return u.SiFactor, decimal.Zero
 }
 
-func maybeAmbiguousUnitName(name string) (string, bool) {
-	// if the fist char of unit
+func MaybeAmbiguousUnitName(name string) (string, bool) {
+	// if the first char of unit
 	// is a digit, we use brackets
 	// to remove ambiguity.
 	c := name[0]
@@ -141,13 +151,15 @@ var unitAsset embed.FS
 type staticum struct {
 	m map[string]Unit
 
+	dimMUnits map[Dimension][]*MetaUnit
+
 	ulens []int
 	names []string
 }
 
 func newStaticUintManager() UnitManager {
 	m := make(map[string]Unit)
-	dimUnits := make(map[Dimension][]*MetaUnit)
+	dimMUnits := make(map[Dimension][]*MetaUnit)
 	var names []string
 
 	f, _ := unitAsset.Open("unit.csv")
@@ -173,9 +185,9 @@ func newStaticUintManager() UnitManager {
 			siOffset:  siOffset,
 		}
 		m[u.name] = &u
-		dimUnits[u.dimension] = append(dimUnits[u.dimension], &u)
+		dimMUnits[u.dimension] = append(dimMUnits[u.dimension], &u)
 		names = append(names, u.name)
-		if s, ok := maybeAmbiguousUnitName(u.name); ok {
+		if s, ok := MaybeAmbiguousUnitName(u.name); ok {
 			names = append(names, s)
 		}
 	}
@@ -190,13 +202,13 @@ func newStaticUintManager() UnitManager {
 	// generate all possible compound units
 	for _, p := range permutations {
 		num, den := p[0], p[1]
-		nums := dimUnits[num]
-		dens := dimUnits[den]
+		nums := dimMUnits[num]
+		dens := dimMUnits[den]
 		for i := 0; i < len(nums); i++ {
 			for j := 0; j < len(dens); j++ {
 				cu := newCompoundUnit(nums[i], dens[j])
 				names = append(names, cu.Name())
-				if s, ok := maybeAmbiguousUnitName(cu.Name()); ok {
+				if s, ok := MaybeAmbiguousUnitName(cu.Name()); ok {
 					names = append(names, s)
 				}
 				m[cu.Name()] = cu
@@ -211,7 +223,7 @@ func newStaticUintManager() UnitManager {
 	for i, name := range names {
 		ulens[i] = len(name)
 	}
-	return &staticum{names: names, ulens: ulens, m: m}
+	return &staticum{names: names, ulens: ulens, m: m, dimMUnits: dimMUnits}
 }
 
 func permute(arr []Dimension, ans *[][]Dimension, dims []Dimension, depth int) {
@@ -267,6 +279,17 @@ func (su *staticum) IsUnit(s string) bool {
 func (su *staticum) GetByName(name string) (Unit, bool) {
 	u, ok := su.m[name]
 	return u, ok
+}
+
+func (su *staticum) ListMetaUnitsByDims(dims ...Dimension) ([]*MetaUnit, error) {
+	var ans []*MetaUnit
+	for _, dim := range dims {
+		ans = append(ans, su.dimMUnits[dim]...)
+	}
+	sort.SliceStable(ans, func(i, j int) bool {
+		return ans[i].label < ans[j].label
+	})
+	return ans, nil
 }
 
 // StdUm a builtin static unit manager

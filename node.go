@@ -51,6 +51,14 @@ func makeUnitlessMeasureValue(value string) (*MeasureValue, error) {
 	}, nil
 }
 
+func MakeMeasureValueFromDecimal(d decimal.Decimal, unit string) *MeasureValue {
+	return &MeasureValue{
+		um:    StdUm,
+		value: d,
+		unit:  unit,
+	}
+}
+
 func makeMeasureValue(value, unit string) (*MeasureValue, error) {
 	d, err := decimal.NewFromString(value)
 	if err != nil {
@@ -60,6 +68,10 @@ func makeMeasureValue(value, unit string) (*MeasureValue, error) {
 }
 
 func makeLiteralMeasureValue(s string) (*MeasureValue, error) {
+	d, err := decimal.NewFromString(s)
+	if err == nil {
+		return &MeasureValue{um: StdUm, value: d, unitless: true}, nil
+	}
 	return NewMeasureValueFromString(s)
 }
 
@@ -75,6 +87,35 @@ type mvopstat struct {
 	rmv *MeasureValue
 
 	targetUnit string
+}
+
+func (mv *MeasureValue) To(targetUnitName string) (*MeasureValue, error) {
+	if mv.unit == targetUnitName {
+		return &MeasureValue{um: mv.um, value: mv.value, unit: mv.unit, unitless: mv.unitless}, nil
+	}
+	tunit, ok := mv.um.GetByName(targetUnitName)
+	if !ok {
+		return nil, fmt.Errorf("target unit %s not found", targetUnitName)
+	}
+	mvunit, ok := mv.um.GetByName(mv.unit)
+	if !ok {
+		return nil, fmt.Errorf("unit %s not found", mv.unit)
+	}
+	// target unit is si unit
+	si := mv.toSi(mvunit)
+	if si.unit == tunit.Name() {
+		return si, nil
+	}
+	// target unit is not si unit
+	tFactor, tOffset := tunit.SiFactors()
+	d := si.value.Div(tFactor)
+	d = d.Sub(tOffset)
+	return &MeasureValue{
+		um:       mv.um,
+		unit:     tunit.Name(),
+		unitless: false,
+		value:    d,
+	}, nil
 }
 
 func (mv *MeasureValue) toSi(mvUnit Unit) *MeasureValue {
@@ -136,14 +177,6 @@ func (mv *MeasureValue) parseSub(other *MeasureValue) (*mvopstat, bool) {
 }
 
 func (mv *MeasureValue) parseMul(other *MeasureValue) (*mvopstat, bool) {
-	// either both unitless or unit measured
-	// are allowed, otherwise not allowed
-	if mv.unitless && !other.unitless {
-		return nil, false
-	}
-	if !mv.unitless && other.unitless {
-		return nil, false
-	}
 	// if both unitless, allow
 	if mv.unitless && other.unitless {
 		return &mvopstat{
@@ -151,6 +184,15 @@ func (mv *MeasureValue) parseMul(other *MeasureValue) (*mvopstat, bool) {
 			lmv:      mv,
 			rmv:      other,
 		}, true
+	}
+	// if one them is measure value and one of them
+	// is unitless, allow it. consider the unitless
+	// as the coefficient
+	if mv.unitless && !other.unitless {
+		return &mvopstat{unitless: false, lmv: other, rmv: mv, targetUnit: other.unit}, true
+	}
+	if !mv.unitless && other.unitless {
+		return &mvopstat{unitless: false, lmv: mv, rmv: other, targetUnit: mv.unit}, true
 	}
 
 	// both are unit measured value onwards
@@ -245,7 +287,7 @@ func (mv *MeasureValue) Add(other *MeasureValue) (*MeasureValue, error) {
 		return nil, fmt.Errorf("(%s)+(%s) is unsupported", mv.unit, other.unit)
 	}
 	d := mvos.lmv.value.Add(mvos.rmv.value)
-	return &MeasureValue{um: mv.um, value: d, unit: mvos.targetUnit}, nil
+	return &MeasureValue{um: mv.um, value: d, unitless: mvos.unitless, unit: mvos.targetUnit}, nil
 }
 
 func (mv *MeasureValue) Sub(other *MeasureValue) (*MeasureValue, error) {
@@ -254,7 +296,7 @@ func (mv *MeasureValue) Sub(other *MeasureValue) (*MeasureValue, error) {
 		return nil, fmt.Errorf("(%s)-(%s) is unsupported", mv.unit, other.unit)
 	}
 	d := mvos.lmv.value.Sub(mvos.rmv.value)
-	return &MeasureValue{um: mv.um, value: d, unit: mvos.targetUnit}, nil
+	return &MeasureValue{um: mv.um, value: d, unitless: mvos.unitless, unit: mvos.targetUnit}, nil
 }
 
 func (mv *MeasureValue) Mul(other *MeasureValue) (*MeasureValue, error) {
@@ -263,7 +305,7 @@ func (mv *MeasureValue) Mul(other *MeasureValue) (*MeasureValue, error) {
 		return nil, fmt.Errorf("(%s)*(%s) is unsupported", mv.unit, other.unit)
 	}
 	d := mvos.lmv.value.Mul(mvos.rmv.value)
-	return &MeasureValue{um: mv.um, value: d, unit: mvos.targetUnit}, nil
+	return &MeasureValue{um: mv.um, value: d, unitless: mvos.unitless, unit: mvos.targetUnit}, nil
 }
 
 func (mv *MeasureValue) Div(other *MeasureValue) (*MeasureValue, error) {
@@ -272,7 +314,7 @@ func (mv *MeasureValue) Div(other *MeasureValue) (*MeasureValue, error) {
 		return nil, fmt.Errorf("(%s)/(%s) is unsupported", mv.unit, other.unit)
 	}
 	d := mvos.lmv.value.Div(mvos.rmv.value)
-	return &MeasureValue{um: mv.um, value: d, unit: mvos.targetUnit}, nil
+	return &MeasureValue{um: mv.um, value: d, unitless: mvos.unitless, unit: mvos.targetUnit}, nil
 }
 
 func (mv *MeasureValue) Neg() *MeasureValue {
@@ -282,10 +324,21 @@ func (mv *MeasureValue) Neg() *MeasureValue {
 func (mv *MeasureValue) String() string {
 	ans := bytes.NewBufferString(mv.value.String())
 	if mv.unit != "" {
-		s, _ := maybeAmbiguousUnitName(mv.unit)
+		s, _ := MaybeAmbiguousUnitName(mv.unit)
 		ans.WriteString(s)
 	}
 	return ans.String()
+}
+
+func (mv *MeasureValue) Value() decimal.Decimal {
+	return mv.value
+}
+
+func (mv *MeasureValue) Unit() string {
+	if mv.unit == "" {
+		return "" // unitless is allowed
+	}
+	return mv.unit
 }
 
 type LiteralString struct {

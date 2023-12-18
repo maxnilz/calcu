@@ -55,6 +55,36 @@ print(CO2, CH2, N2O, GHG);
 	}
 }
 
+func TestInterpreterUnitless(t *testing.T) {
+	exprs := `
+CH4 = activity_value * FractionofGassyCoalMines * CH4Factor * CH4ConversionFactor;
+GHG = CH4;
+print(CH4, GHG);
+`
+	vars := map[string]string{
+		"activity_value":           "30",
+		"FractionofGassyCoalMines": "0.1",
+		"CH4Factor":                "0.402m3",
+		"CH4ConversionFactor":      "1.1E-03Gg/m3",
+	}
+	intrp, err := NewInterpreter(vars)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rd := bytes.NewBufferString(exprs)
+	outvars, err := intrp.Interpret(rd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ch4 := outvars["CH4"]
+	ghg := outvars["GHG"]
+	gots := []string{ch4.String(), ghg.String()}
+	expected := []string{"1326.6kg", "1326.6kg"}
+	if !reflect.DeepEqual(expected, gots) {
+		t.Fatalf("exptectd: %v, got: %v", expected, gots)
+	}
+}
+
 func TestInterpreterReuseVar(t *testing.T) {
 	exprs := `
 a = a + 1kg;

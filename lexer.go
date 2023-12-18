@@ -3,8 +3,9 @@ package calcu
 import (
 	"errors"
 	"fmt"
-	"github.com/shopspring/decimal"
 	"regexp"
+
+	"github.com/shopspring/decimal"
 )
 
 const (

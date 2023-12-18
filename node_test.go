@@ -93,3 +93,29 @@ func TestMeasureValueMul2(t *testing.T) {
 		})
 	}
 }
+
+func TestMeasureValueMul3(t *testing.T) {
+	cases := []struct {
+		a        string
+		auitless bool
+		b        string
+		buitless bool
+		expected string
+	}{
+		// one is unitless, one is unit
+		{a: "1kg/m3", b: "2", buitless: true, expected: "2kg/m3"},
+		{a: "2", auitless: true, b: "2m3", expected: "4m3"},
+	}
+	for i, c := range cases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			a, b := mustMV(c.a, c.auitless), mustMV(c.b, c.buitless)
+			got, err := a.Mul(b)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if c.expected != got.String() {
+				t.Fatalf("expected: %v, got: %v", c.expected, got.String())
+			}
+		})
+	}
+}

@@ -8,9 +8,24 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+
+	"github.com/shopspring/decimal"
 )
 
 type MeasureVars map[string]*MeasureValue
+
+func (m MeasureVars) Get(key string) (*MeasureValue, bool) {
+	mv, ok := m[key]
+	return mv, ok
+}
+
+func (m MeasureVars) Decimal(key string) decimal.NullDecimal {
+	mv, ok := m[key]
+	if !ok {
+		return decimal.NullDecimal{}
+	}
+	return decimal.NullDecimal{Valid: true, Decimal: mv.Value()}
+}
 
 type Interpreter struct {
 	mvvars MeasureVars
