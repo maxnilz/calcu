@@ -26,8 +26,10 @@ func setRoot(exprlex exprLexer, node Node) {
 %type<list> func_arg_list
 %type<node> a_expr func_call func_arg_expr assignment statement
 
-%left '+' '-'
-%left '*' '/'
+%left      '+' '-'
+%left      '*' '/'
+%nonassoc  '='
+%left      '(' ')'
 
 %%
 
@@ -46,7 +48,7 @@ a_expr: NUM UNIT
         }
       | LITERALMV
         {
-          n, err := makeLiteralMeasureValue($1)
+          n, err := makeMeasureValueFromString($1)
           if err != nil {
               return setErr(exprlex, err)
           }
@@ -119,25 +121,13 @@ func_arg_list: func_arg_expr
                }
 	     ;
 
-func_arg_expr: IDENT
-               {
-                 $$ = makeVariable($1)
-               }
-             | LITERALMV
-               {
-                 n, err := makeLiteralMeasureValue($1)
-                 if err != nil {
-                     return setErr(exprlex, err)
-                 }
-                 $$ = n
-               }
-             | LITERALSTR
-               {
-                 $$ = makeLiteralString($1)
-               }
-             | a_expr
+func_arg_expr: a_expr
                {
                  $$ = $1
+               }
+              | LITERALSTR
+               {
+                 $$ = makeLiteralString($1)
                }
              ;
 

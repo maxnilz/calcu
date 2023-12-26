@@ -39,7 +39,7 @@ type Interpreter struct {
 func NewInterpreter(vars map[string]string, fns ...interface{}) (*Interpreter, error) {
 	mvvars := make(map[string]*MeasureValue)
 	for k, s := range vars {
-		mv, err := makeLiteralMeasureValue(s)
+		mv, err := makeMeasureValueFromString(s)
 		if err != nil {
 			return nil, err
 		}

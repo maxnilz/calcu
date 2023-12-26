@@ -28,6 +28,7 @@ const (
 	DimMass
 	DimVolume
 	DimTime
+	DimLength
 )
 
 func DimensionFromString(s string) Dimension {
@@ -41,6 +42,8 @@ func DimensionFromString(s string) Dimension {
 		d = DimVolume
 	case "Time":
 		d = DimTime
+	case "Length":
+		d = DimLength
 	}
 	return d
 }
@@ -193,7 +196,7 @@ func newStaticUintManager() UnitManager {
 	}
 
 	// permutations for dimensions to build compound units
-	dims := []Dimension{DimEnergy, DimMass, DimVolume, DimTime}
+	dims := []Dimension{DimEnergy, DimMass, DimVolume, DimTime, DimLength}
 	var arr []Dimension
 	var permutations [][]Dimension
 	// we only need permutation with length of 2
@@ -259,12 +262,26 @@ func (su *staticum) dimension(s string) (Dimension, bool) {
 }
 
 func (su *staticum) Peek(s string) (int, bool) {
-	for i, a := range su.names {
+	for i, name := range su.names {
 		n := su.ulens[i]
 		if len(s) < n {
 			continue
 		}
-		if s[:n] == a {
+		a, b := s[:n], ""
+		if len(s) > n {
+			b = s[n:]
+		}
+		// consider the following char to
+		// avoid mistake, i.e., the unit
+		// token should only appear before
+		// a separator char or end of line.
+		// not in front of a char. for example,
+		// consider unit Meter(m), without
+		// check the following char, we might
+		// treat the `m` in word `me` as a unit
+		// or the `m` in `m = 1` will be treated
+		// as a unit as well.
+		if a == name && startWithSeparator(b) {
 			return n, true
 		}
 	}

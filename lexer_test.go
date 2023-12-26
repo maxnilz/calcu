@@ -65,6 +65,18 @@ func TestLexer(t *testing.T) {
 			expr:     `SI = Convert(activity_value, activity_unit, "10^3m3", "hello", 123.123, "10(10^3m3)")`,
 			expected: []int{IDENT, IDENT, IDENT, IDENT, UNIT, LITERALSTR, NUM, LITERALMV},
 		},
+		{
+			expr:     `fTypes("hello world", a, 1kg, "1kg", "10(10^3m3)");`,
+			expected: []int{IDENT, LITERALSTR, IDENT, NUM, UNIT, LITERALMV, LITERALMV},
+		},
+		{
+			expr:     `m = 1;`,
+			expected: []int{IDENT, NUM},
+		},
+		{
+			expr:     `me = 1;`,
+			expected: []int{IDENT, NUM},
+		},
 	}
 
 	for i, c := range cases {

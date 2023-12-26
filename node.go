@@ -67,9 +67,10 @@ func makeMeasureValue(value, unit string) (*MeasureValue, error) {
 	return &MeasureValue{um: StdUm, value: d, unit: unit}, nil
 }
 
-func makeLiteralMeasureValue(s string) (*MeasureValue, error) {
+func makeMeasureValueFromString(s string) (*MeasureValue, error) {
 	d, err := decimal.NewFromString(s)
 	if err == nil {
+		// try unitless first
 		return &MeasureValue{um: StdUm, value: d, unitless: true}, nil
 	}
 	return NewMeasureValueFromString(s)

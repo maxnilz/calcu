@@ -57,18 +57,16 @@ func (l *lexer) Lex(lval *exprSymType) int {
 	}
 
 	// Try math on unit first
-	{
-		if n, ok := l.um.Peek(l.in); ok {
-			str := l.in[:n]
-			l.in = l.in[n:]
-			if str[0] == '(' {
-				// remove brackets
-				str = str[1 : len(str)-1]
-			}
-			lval.str = str
-			lval.token = UNIT
-			return UNIT
+	if n, ok := l.um.Peek(l.in); ok {
+		str := l.in[:n]
+		l.in = l.in[n:]
+		if str[0] == '(' {
+			// remove brackets
+			str = str[1 : len(str)-1]
 		}
+		lval.str = str
+		lval.token = UNIT
+		return UNIT
 	}
 
 	for _, r := range rules {
@@ -79,8 +77,6 @@ func (l *lexer) Lex(lval *exprSymType) int {
 			case IDENT:
 				lval.str = str
 			case NUM:
-				lval.str = str
-			case UNIT:
 				lval.str = str
 			case LITERALSTR:
 				// remove quote
@@ -126,6 +122,17 @@ func (l *lexer) setRoot(node Node) {
 
 func isSpace(c byte) bool {
 	return c == ' ' || c == '\t' || c == '\n'
+}
+
+func startWithSeparator(s string) bool {
+	for len(s) > 0 && isSpace(s[0]) {
+		s = s[1:]
+	}
+	if len(s) == 0 {
+		return true
+	}
+	c := s[0]
+	return c == ',' || c == ';' || c == ')'
 }
 
 func NewMeasureValueFromString(s string) (*MeasureValue, error) {

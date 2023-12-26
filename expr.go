@@ -45,11 +45,11 @@ var exprToknames = [...]string{
 	"'-'",
 	"'*'",
 	"'/'",
-	"';'",
+	"'='",
 	"'('",
 	"')'",
+	"';'",
 	"','",
-	"'='",
 }
 
 var exprStatenames = [...]string{}
@@ -58,66 +58,66 @@ const exprEofCode = 1
 const exprErrCode = 2
 const exprInitialStackSize = 16
 
-//line expr.y:162
+//line expr.y:152
 
 //line yacctab:1
 var exprExca = [...]int8{
 	-1, 1,
 	1, -1,
 	-2, 0,
-	-1, 22,
+	-1, 21,
 	14, 15,
 	-2, 7,
 }
 
 const exprPrivate = 57344
 
-const exprLast = 52
+const exprLast = 51
 
 var exprAct = [...]int8{
-	16, 23, 24, 13, 17, 12, 15, 14, 9, 18,
-	19, 8, 27, 28, 10, 25, 26, 27, 28, 30,
-	7, 6, 29, 2, 5, 1, 33, 34, 35, 36,
-	32, 13, 17, 20, 15, 14, 3, 18, 31, 17,
-	11, 4, 21, 0, 18, 22, 17, 0, 0, 21,
-	0, 18,
+	13, 7, 6, 17, 15, 12, 14, 16, 8, 18,
+	19, 22, 2, 23, 10, 24, 25, 26, 27, 29,
+	26, 27, 20, 9, 28, 31, 32, 33, 34, 30,
+	17, 15, 5, 14, 16, 1, 18, 17, 15, 3,
+	11, 16, 4, 18, 21, 15, 0, 0, 16, 0,
+	18,
 }
 
 var exprPact = [...]int16{
-	20, -1000, 8, 7, -3, -9, -1000, -1000, -1, 41,
-	-1000, -14, -1000, -1000, -1000, -1000, 6, 16, 34, 6,
-	-1000, -1000, -1000, -1000, 27, 34, 34, 34, 34, -1000,
-	-1000, -1000, -1000, 1, 1, -1000, -1000,
+	28, -1000, -14, -15, -6, 10, -1000, -1000, -1, 40,
+	-1000, -4, -1000, 6, -1000, 18, -1000, -1000, 33, 6,
+	-1000, -1000, -1000, 26, 33, 33, 33, 33, -1000, -1000,
+	-1000, 9, 9, -1000, -1000,
 }
 
 var exprPgo = [...]int8{
-	0, 41, 40, 0, 23, 5, 36, 25,
+	0, 42, 40, 0, 12, 5, 39, 35,
 }
 
 var exprR1 = [...]int8{
 	0, 7, 7, 7, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 4, 4, 1, 2, 2, 5, 5,
-	5, 5, 6, 6,
+	6, 6,
 }
 
 var exprR2 = [...]int8{
 	0, 0, 2, 2, 2, 1, 1, 1, 3, 3,
 	3, 3, 2, 3, 4, 1, 1, 3, 1, 1,
-	1, 1, 3, 3,
+	3, 3,
 }
 
 var exprChk = [...]int16{
-	-1000, -7, -4, -6, -1, 4, 13, 13, 14, 17,
-	15, -2, -5, 4, 8, 7, -3, 5, 10, -3,
-	-4, 8, 4, 15, 16, 9, 10, 11, 12, 6,
-	-3, 4, -5, -3, -3, -3, -3,
+	-1000, -7, -4, -6, -1, 4, 16, 16, 14, 13,
+	15, -2, -5, -3, 7, 5, 8, 4, 10, -3,
+	-4, 4, 15, 17, 9, 10, 11, 12, 6, -3,
+	-5, -3, -3, -3, -3,
 }
 
 var exprDef = [...]int8{
 	1, -2, 0, 0, 0, 15, 2, 3, 0, 0,
-	13, 0, 16, 7, 5, 20, 21, 6, 0, 22,
-	23, 5, -2, 14, 0, 0, 0, 0, 0, 4,
-	12, 7, 17, 8, 9, 10, 11,
+	13, 0, 16, 18, 19, 6, 5, 7, 0, 20,
+	21, -2, 14, 0, 0, 0, 0, 0, 4, 12,
+	17, 8, 9, 10, 11,
 }
 
 var exprTok1 = [...]int8{
@@ -125,9 +125,9 @@ var exprTok1 = [...]int8{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	14, 15, 11, 9, 16, 10, 3, 12, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 13,
-	3, 17,
+	14, 15, 11, 9, 17, 10, 3, 12, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 16,
+	3, 13,
 }
 
 var exprTok2 = [...]int8{
@@ -477,25 +477,25 @@ exprdefault:
 
 	case 1:
 		exprDollar = exprS[exprpt-0 : exprpt+1]
-//line expr.y:34
+//line expr.y:36
 		{
 			setRoot(exprlex, nil)
 		}
 	case 2:
 		exprDollar = exprS[exprpt-2 : exprpt+1]
-//line expr.y:35
+//line expr.y:37
 		{
 			setRoot(exprlex, exprDollar[1].node)
 		}
 	case 3:
 		exprDollar = exprS[exprpt-2 : exprpt+1]
-//line expr.y:36
+//line expr.y:38
 		{
 			setRoot(exprlex, exprDollar[1].node)
 		}
 	case 4:
 		exprDollar = exprS[exprpt-2 : exprpt+1]
-//line expr.y:40
+//line expr.y:42
 		{
 			n, err := makeMeasureValue(exprDollar[1].str, exprDollar[2].str)
 			if err != nil {
@@ -505,9 +505,9 @@ exprdefault:
 		}
 	case 5:
 		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:48
+//line expr.y:50
 		{
-			n, err := makeLiteralMeasureValue(exprDollar[1].str)
+			n, err := makeMeasureValueFromString(exprDollar[1].str)
 			if err != nil {
 				return setErr(exprlex, err)
 			}
@@ -515,7 +515,7 @@ exprdefault:
 		}
 	case 6:
 		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:56
+//line expr.y:58
 		{
 			n, err := makeUnitlessMeasureValue(exprDollar[1].str)
 			if err != nil {
@@ -525,43 +525,43 @@ exprdefault:
 		}
 	case 7:
 		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:64
+//line expr.y:66
 		{
 			exprVAL.node = makeVariable(exprDollar[1].str)
 		}
 	case 8:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:68
+//line expr.y:70
 		{
 			exprVAL.node = makeBinaryExpr(exprDollar[1].node, exprDollar[3].node, "+")
 		}
 	case 9:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:72
+//line expr.y:74
 		{
 			exprVAL.node = makeBinaryExpr(exprDollar[1].node, exprDollar[3].node, "-")
 		}
 	case 10:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:76
+//line expr.y:78
 		{
 			exprVAL.node = makeBinaryExpr(exprDollar[1].node, exprDollar[3].node, "*")
 		}
 	case 11:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:80
+//line expr.y:82
 		{
 			exprVAL.node = makeBinaryExpr(exprDollar[1].node, exprDollar[3].node, "/")
 		}
 	case 12:
 		exprDollar = exprS[exprpt-2 : exprpt+1]
-//line expr.y:84
+//line expr.y:86
 		{
 			exprVAL.node = makeUnaryExpr(exprDollar[2].node)
 		}
 	case 13:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:90
+//line expr.y:92
 		{
 			n, err := makeFuncCall(exprDollar[1].str)
 			if err != nil {
@@ -571,7 +571,7 @@ exprdefault:
 		}
 	case 14:
 		exprDollar = exprS[exprpt-4 : exprpt+1]
-//line expr.y:98
+//line expr.y:100
 		{
 			n, err := makeFuncCall(exprDollar[1].str, exprDollar[3].list.elements...)
 			if err != nil {
@@ -581,7 +581,7 @@ exprdefault:
 		}
 	case 16:
 		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:111
+//line expr.y:113
 		{
 			l := makeList()
 			l.Append(exprDollar[1].node)
@@ -589,41 +589,25 @@ exprdefault:
 		}
 	case 17:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:117
+//line expr.y:119
 		{
 			exprVAL.list.Append(exprDollar[3].node)
 		}
 	case 18:
 		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:123
-		{
-			exprVAL.node = makeVariable(exprDollar[1].str)
-		}
-	case 19:
-		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:127
-		{
-			n, err := makeLiteralMeasureValue(exprDollar[1].str)
-			if err != nil {
-				return setErr(exprlex, err)
-			}
-			exprVAL.node = n
-		}
-	case 20:
-		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:135
-		{
-			exprVAL.node = makeLiteralString(exprDollar[1].str)
-		}
-	case 21:
-		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:139
+//line expr.y:125
 		{
 			exprVAL.node = exprDollar[1].node
 		}
-	case 22:
+	case 19:
+		exprDollar = exprS[exprpt-1 : exprpt+1]
+//line expr.y:129
+		{
+			exprVAL.node = makeLiteralString(exprDollar[1].str)
+		}
+	case 20:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:145
+//line expr.y:135
 		{
 			n, err := makeAssignment(exprDollar[1].str, exprDollar[3].node)
 			if err != nil {
@@ -631,9 +615,9 @@ exprdefault:
 			}
 			exprVAL.node = n
 		}
-	case 23:
+	case 21:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:153
+//line expr.y:143
 		{
 			n, err := makeAssignment(exprDollar[1].str, exprDollar[3].node)
 			if err != nil {

@@ -14,7 +14,7 @@ func mustMV(s string, unitless bool) *MeasureValue {
 		}
 		return mv
 	}
-	mv, err := makeLiteralMeasureValue(s)
+	mv, err := makeMeasureValueFromString(s)
 	if err != nil {
 		panic(err)
 	}

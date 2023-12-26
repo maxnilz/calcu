@@ -20,3 +20,14 @@ m3,Cubic Metre,Volume,m3,1,0
 10^3m3,Kilo Cubic Meter,Volume,m3,1000,0
 10^6m3,Mega Cubic Meter,Volume,m3,1000000,0
 10^9m3,Giga Cubic Metere ,Volume,m3,1000000000,0
+m,Meter,Length,m,1,0
+km,Kilometer,Length,m,1000,0
+cm,Centimeter,Length,m,0.01,0
+mm,Millimeter,Length,m,0.0001,0
+yd,Yard,Length,m,0.9144,0
+ft,Foot,Length,m,0.3048,0
+in,Inch,Length,m,0.0254,0
+mi,Mile,Length,m,1609.344,0
+Mm,Megameter,Length,m,1000000,0
+Gm,Gigameter,Length,m,1000000000,0
+Tm,Terameter,Length,m,1.00E+12,0
