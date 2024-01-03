@@ -77,6 +77,22 @@ func TestLexer(t *testing.T) {
 			expr:     `me = 1;`,
 			expected: []int{IDENT, NUM},
 		},
+		{
+			expr:     `me = 1m + 2m;`,
+			expected: []int{IDENT, NUM, UNIT, NUM, UNIT},
+		},
+		{
+			expr:     `me = -1m;`,
+			expected: []int{IDENT, NUM, UNIT},
+		},
+		{
+			expr:     `a *b * 44/12;`,
+			expected: []int{IDENT, IDENT, NUM, NUM},
+		},
+		{
+			expr:     `a * b * (1 + 2);`,
+			expected: []int{IDENT, IDENT, NUM, NUM},
+		},
 	}
 
 	for i, c := range cases {

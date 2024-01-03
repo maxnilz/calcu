@@ -58,66 +58,66 @@ const exprEofCode = 1
 const exprErrCode = 2
 const exprInitialStackSize = 16
 
-//line expr.y:152
+//line expr.y:156
 
 //line yacctab:1
 var exprExca = [...]int8{
 	-1, 1,
 	1, -1,
 	-2, 0,
-	-1, 21,
-	14, 15,
+	-1, 22,
+	14, 16,
 	-2, 7,
 }
 
 const exprPrivate = 57344
 
-const exprLast = 51
+const exprLast = 60
 
 var exprAct = [...]int8{
-	13, 7, 6, 17, 15, 12, 14, 16, 8, 18,
-	19, 22, 2, 23, 10, 24, 25, 26, 27, 29,
-	26, 27, 20, 9, 28, 31, 32, 33, 34, 30,
-	17, 15, 5, 14, 16, 1, 18, 17, 15, 3,
-	11, 16, 4, 18, 21, 15, 0, 0, 16, 0,
-	18,
+	13, 7, 6, 17, 15, 12, 14, 16, 8, 19,
+	20, 27, 28, 18, 10, 25, 26, 27, 28, 30,
+	31, 37, 23, 9, 24, 29, 33, 34, 35, 36,
+	32, 17, 15, 2, 14, 16, 5, 19, 17, 15,
+	1, 18, 16, 21, 19, 22, 15, 3, 18, 16,
+	11, 19, 4, 0, 0, 18, 25, 26, 27, 28,
 }
 
 var exprPact = [...]int16{
-	28, -1000, -14, -15, -6, 10, -1000, -1000, -1, 40,
-	-1000, -4, -1000, 6, -1000, 18, -1000, -1000, 33, 6,
-	-1000, -1000, -1000, 26, 33, 33, 33, 33, -1000, -1000,
-	-1000, 9, 9, -1000, -1000,
+	32, -1000, -14, -15, -6, 10, -1000, -1000, -1, 41,
+	-1000, 7, -1000, 47, -1000, 19, -1000, -1000, 34, 34,
+	47, -1000, -1000, -1000, 27, 34, 34, 34, 34, -1000,
+	6, -1000, -1000, 0, 0, -1000, -1000, -1000,
 }
 
 var exprPgo = [...]int8{
-	0, 42, 40, 0, 12, 5, 39, 35,
+	0, 52, 50, 0, 33, 5, 47, 40,
 }
 
 var exprR1 = [...]int8{
 	0, 7, 7, 7, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 4, 4, 1, 2, 2, 5, 5,
-	6, 6,
+	3, 3, 3, 3, 4, 4, 1, 2, 2, 5,
+	5, 6, 6,
 }
 
 var exprR2 = [...]int8{
 	0, 0, 2, 2, 2, 1, 1, 1, 3, 3,
-	3, 3, 2, 3, 4, 1, 1, 3, 1, 1,
-	3, 3,
+	3, 3, 3, 2, 3, 4, 1, 1, 3, 1,
+	1, 3, 3,
 }
 
 var exprChk = [...]int16{
 	-1000, -7, -4, -6, -1, 4, 16, 16, 14, 13,
-	15, -2, -5, -3, 7, 5, 8, 4, 10, -3,
-	-4, 4, 15, 17, 9, 10, 11, 12, 6, -3,
-	-5, -3, -3, -3, -3,
+	15, -2, -5, -3, 7, 5, 8, 4, 14, 10,
+	-3, -4, 4, 15, 17, 9, 10, 11, 12, 6,
+	-3, -3, -5, -3, -3, -3, -3, 15,
 }
 
 var exprDef = [...]int8{
-	1, -2, 0, 0, 0, 15, 2, 3, 0, 0,
-	13, 0, 16, 18, 19, 6, 5, 7, 0, 20,
-	21, -2, 14, 0, 0, 0, 0, 0, 4, 12,
-	17, 8, 9, 10, 11,
+	1, -2, 0, 0, 0, 16, 2, 3, 0, 0,
+	14, 0, 17, 19, 20, 6, 5, 7, 0, 0,
+	21, 22, -2, 15, 0, 0, 0, 0, 0, 4,
+	0, 13, 18, 8, 9, 10, 11, 12,
 }
 
 var exprTok1 = [...]int8{
@@ -554,14 +554,20 @@ exprdefault:
 			exprVAL.node = makeBinaryExpr(exprDollar[1].node, exprDollar[3].node, "/")
 		}
 	case 12:
-		exprDollar = exprS[exprpt-2 : exprpt+1]
+		exprDollar = exprS[exprpt-3 : exprpt+1]
 //line expr.y:86
+		{
+			exprVAL.node = makeParenExpr(exprDollar[2].node)
+		}
+	case 13:
+		exprDollar = exprS[exprpt-2 : exprpt+1]
+//line expr.y:90
 		{
 			exprVAL.node = makeUnaryExpr(exprDollar[2].node)
 		}
-	case 13:
+	case 14:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:92
+//line expr.y:96
 		{
 			n, err := makeFuncCall(exprDollar[1].str)
 			if err != nil {
@@ -569,9 +575,9 @@ exprdefault:
 			}
 			exprVAL.node = n
 		}
-	case 14:
+	case 15:
 		exprDollar = exprS[exprpt-4 : exprpt+1]
-//line expr.y:100
+//line expr.y:104
 		{
 			n, err := makeFuncCall(exprDollar[1].str, exprDollar[3].list.elements...)
 			if err != nil {
@@ -579,35 +585,35 @@ exprdefault:
 			}
 			exprVAL.node = n
 		}
-	case 16:
+	case 17:
 		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:113
+//line expr.y:117
 		{
 			l := makeList()
 			l.Append(exprDollar[1].node)
 			exprVAL.list = l
 		}
-	case 17:
+	case 18:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:119
+//line expr.y:123
 		{
 			exprVAL.list.Append(exprDollar[3].node)
-		}
-	case 18:
-		exprDollar = exprS[exprpt-1 : exprpt+1]
-//line expr.y:125
-		{
-			exprVAL.node = exprDollar[1].node
 		}
 	case 19:
 		exprDollar = exprS[exprpt-1 : exprpt+1]
 //line expr.y:129
 		{
-			exprVAL.node = makeLiteralString(exprDollar[1].str)
+			exprVAL.node = exprDollar[1].node
 		}
 	case 20:
+		exprDollar = exprS[exprpt-1 : exprpt+1]
+//line expr.y:133
+		{
+			exprVAL.node = makeLiteralString(exprDollar[1].str)
+		}
+	case 21:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:135
+//line expr.y:139
 		{
 			n, err := makeAssignment(exprDollar[1].str, exprDollar[3].node)
 			if err != nil {
@@ -615,9 +621,9 @@ exprdefault:
 			}
 			exprVAL.node = n
 		}
-	case 21:
+	case 22:
 		exprDollar = exprS[exprpt-3 : exprpt+1]
-//line expr.y:143
+//line expr.y:147
 		{
 			n, err := makeAssignment(exprDollar[1].str, exprDollar[3].node)
 			if err != nil {

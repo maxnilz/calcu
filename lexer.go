@@ -132,7 +132,7 @@ func startWithSeparator(s string) bool {
 		return true
 	}
 	c := s[0]
-	return c == ',' || c == ';' || c == ')'
+	return c == ',' || c == ';' || c == '(' || c == ')' || c == '+' || c == '-' || c == '*' || c == '/'
 }
 
 func NewMeasureValueFromString(s string) (*MeasureValue, error) {

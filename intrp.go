@@ -204,6 +204,12 @@ func (i *Interpreter) visitAExpr(a Node) (*MeasureValue, error) {
 			return nil, err
 		}
 		return mv, nil
+	case NodeTypeParenExpr:
+		mv, err := i.visitParenExpr(a.(*ParenExpr))
+		if err != nil {
+			return nil, err
+		}
+		return mv, nil
 	default:
 		return nil, fmt.Errorf("found unsupported expr node: %v", a.Type())
 	}
@@ -334,7 +340,7 @@ func (i *Interpreter) visitBinaryExpr(a *BinaryExpr) (*MeasureValue, error) {
 	case OpMul:
 		return lhs.Mul(rhs)
 	case OpDiv:
-		return lhs.Sub(rhs)
+		return lhs.Div(rhs)
 	default:
 		return nil, fmt.Errorf("unsupported op %s", a.Op)
 	}
@@ -346,6 +352,14 @@ func (i *Interpreter) visitUnaryExpr(a *UnaryExpr) (*MeasureValue, error) {
 		return nil, err
 	}
 	return ans.Neg(), nil
+}
+
+func (i *Interpreter) visitParenExpr(a *ParenExpr) (*MeasureValue, error) {
+	ans, err := i.visitAExpr(a.expr)
+	if err != nil {
+		return nil, err
+	}
+	return ans, nil
 }
 
 // print is the kernel func of the expr

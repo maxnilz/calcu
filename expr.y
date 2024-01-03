@@ -82,6 +82,10 @@ a_expr: NUM UNIT
         {
           $$ = makeBinaryExpr($1, $3, "/")
         }
+      | '(' a_expr ')'
+        {
+          $$ = makeParenExpr($2)
+        }
       | '-' a_expr %prec '*'
         {
           $$ = makeUnaryExpr($2)

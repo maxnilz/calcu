@@ -22,6 +22,11 @@ CO2 = activity_value * CO2Factor;
 CH2 = activity_value * CH2Factor;
 N2O = activity_value * N2OFactor;
 GHG = CO2 + CH2 + N2O;
+a = CO2 * CH2 * (1 + 2);
+b = CO2 * CH2 * (1 - 2);
+c = CO2 * CH2 * 2/1;
+d = CO2 * CH2 * (2/1);
+print(CO2, CH2, N2O, GHG, a, b, c, d);
 print(CO2, CH2, N2O, GHG);
 `
 	vars := map[string]string{
@@ -43,8 +48,12 @@ print(CO2, CH2, N2O, GHG);
 	ch2 := outvars["CH2"]
 	n2o := outvars["N2O"]
 	ghg := outvars["GHG"]
+	a := outvars["a"]
+	b := outvars["b"]
+	c := outvars["c"]
+	d := outvars["d"]
 
-	fmt.Println(co2, ch2, n2o, ghg)
+	fmt.Println(co2, ch2, n2o, ghg, a, b, c, d)
 }
 ```
 

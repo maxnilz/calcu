@@ -21,6 +21,7 @@ const (
 	NodeTypeFuncCall
 	NodeTypeList
 	NodeTypeAssignment
+	NodeTypeParenExpr
 )
 
 func (t NodeType) String() string {
@@ -197,6 +198,12 @@ func (mv *MeasureValue) parseMul(other *MeasureValue) (*mvopstat, bool) {
 	}
 
 	// both are unit measured value onwards
+
+	// the support cases are:
+	//  1. both are meta unit, e.g., 1m * 1m = 1m (not 1m^2 in strict math)
+	//  2. both are compound unit, e.g., 1kg/m * 1kg/m = 1kg/m (not 1kg^2/m^2 in strict math)
+	//  3. one is meta another is compound, e.g., 1kg/m * 1m = 1kg
+
 	u, ok := mv.um.GetByName(mv.unit)
 	if !ok {
 		return nil, false
@@ -275,11 +282,75 @@ func (mv *MeasureValue) parseMul(other *MeasureValue) (*mvopstat, bool) {
 }
 
 func (mv *MeasureValue) parseDiv(other *MeasureValue) (*mvopstat, bool) {
-	// div support the operations that same as add
-	// TODO: consider support case like: (kg/m3) / m3
-	//  where one of unit is meta unit, and another is
-	//  compound unit.
-	return mv.parseAdd(other)
+	// if both unitless, allow
+	if mv.unitless && other.unitless {
+		return &mvopstat{
+			unitless: true,
+			lmv:      mv,
+			rmv:      other,
+		}, true
+	}
+	// if one them is measure value and one of them
+	// is unitless, allow it. consider the unitless
+	// as the coefficient
+	if mv.unitless && !other.unitless {
+		return &mvopstat{unitless: false, lmv: other, rmv: mv, targetUnit: other.unit}, true
+	}
+	if !mv.unitless && other.unitless {
+		return &mvopstat{unitless: false, lmv: mv, rmv: other, targetUnit: mv.unit}, true
+	}
+
+	// both are unit measured value onwards
+
+	// the support cases are:
+	//  1. both are meta unit, e.g., 1m / 1m = 1m (not 1 in strict math)
+	//  2. both are compound unit, e.g., 1kg/m / 1kg/m = 1kg/m (not 1 in strict math)
+
+	u, ok := mv.um.GetByName(mv.unit)
+	if !ok {
+		return nil, false
+	}
+	ou, ok := mv.um.GetByName(other.unit)
+	if !ok {
+		return nil, false
+	}
+	// if both are meta unit, compatible if dimension is same,
+	// otherwise not allowed.
+	if u.IsMeta() && ou.IsMeta() {
+		if u.Dimension() != ou.Dimension() {
+			return nil, false
+		}
+		lmv, rmv := mv.toSi(u), other.toSi(ou)
+		return &mvopstat{
+			unitless:   false,
+			lmv:        lmv,
+			rmv:        rmv,
+			targetUnit: lmv.unit,
+		}, true
+	}
+	// if both are compound unit, compatible if:
+	//  1. the dimension of Numerator same and
+	//  2. the dimension of Denominator is same
+	if !u.IsMeta() && !ou.IsMeta() {
+		cu1, cu2 := u.(*CompoundUnit), ou.(*CompoundUnit)
+		if cu1.Numerator.Dimension() != cu2.Numerator.Dimension() {
+			return nil, false
+		}
+		if cu1.Denominator.Dimension() != cu2.Denominator.Dimension() {
+			return nil, false
+		}
+		lmv, rmv := mv.toSi(u), other.toSi(ou)
+		return &mvopstat{
+			unitless:   false,
+			lmv:        lmv,
+			rmv:        rmv,
+			targetUnit: lmv.unit,
+		}, true
+	}
+
+	// TODO: one of the unit is meta and another is compound?
+
+	return nil, false
 }
 
 func (mv *MeasureValue) Add(other *MeasureValue) (*MeasureValue, error) {
@@ -401,6 +472,18 @@ func makeUnaryExpr(expr Node) *UnaryExpr {
 
 func (n *UnaryExpr) Type() NodeType {
 	return NodeTypeUnaryExpr
+}
+
+type ParenExpr struct {
+	expr Node
+}
+
+func makeParenExpr(expr Node) *ParenExpr {
+	return &ParenExpr{expr: expr}
+}
+
+func (n *ParenExpr) Type() NodeType {
+	return NodeTypeParenExpr
 }
 
 type FuncCall struct {

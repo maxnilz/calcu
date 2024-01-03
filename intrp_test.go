@@ -27,7 +27,11 @@ CO2 = activity_value * CO2Factor;
 CH2 = activity_value * CH2Factor;
 N2O = activity_value * N2OFactor;
 GHG = CO2 + CH2 + N2O;
-print(CO2, CH2, N2O, GHG);
+a = CO2 * CH2 * (1 + 2);
+b = CO2 * CH2 * (1 - 2);
+c = CO2 * CH2 * 2/1;
+d = CO2 * CH2 * (2/1);
+print(CO2, CH2, N2O, GHG, a, b, c, d);
 `
 	vars := map[string]string{
 		"activity_value": "1(10^3m3)",
@@ -48,8 +52,12 @@ print(CO2, CH2, N2O, GHG);
 	ch2 := outvars["CH2"]
 	n2o := outvars["N2O"]
 	ghg := outvars["GHG"]
-	gots := []string{co2.String(), ch2.String(), n2o.String(), ghg.String()}
-	expected := []string{"110kg", "7.2kg", "1100kg", "1217.2kg"}
+	a := outvars["a"]
+	b := outvars["b"]
+	c := outvars["c"]
+	d := outvars["d"]
+	gots := []string{co2.String(), ch2.String(), n2o.String(), ghg.String(), a.String(), b.String(), c.String(), d.String()}
+	expected := []string{"110kg", "7.2kg", "1100kg", "1217.2kg", "2376kg", "-792kg", "1584kg", "1584kg"}
 	if !reflect.DeepEqual(expected, gots) {
 		t.Fatalf("exptectd: %v, got: %v", expected, gots)
 	}
