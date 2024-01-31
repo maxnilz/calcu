@@ -29,6 +29,7 @@ const (
 	DimVolume
 	DimTime
 	DimLength
+	DimPopulation
 )
 
 func DimensionFromString(s string) Dimension {
@@ -44,6 +45,8 @@ func DimensionFromString(s string) Dimension {
 		d = DimTime
 	case "Length":
 		d = DimLength
+	case "Population":
+		d = DimPopulation
 	}
 	return d
 }
@@ -130,11 +133,38 @@ func (u *CompoundUnit) IsMeta() bool {
 }
 
 func (u *CompoundUnit) SiName() string {
+	if u.isNumDenSameDim() {
+		// if num & den belongs to same dimension try to simplify it
+		// e.g. 1kg/kg = 1
+		return ""
+	}
 	return fmt.Sprintf("%s/%s", u.Numerator.si, u.Denominator.si)
 }
 
 func (u *CompoundUnit) SiFactors() (decimal.Decimal, decimal.Decimal) {
 	return u.SiFactor, decimal.Zero
+}
+
+func (u *CompoundUnit) isNumDenSameDim() bool {
+	return u.Numerator.Dimension() == u.Denominator.Dimension()
+}
+
+func (u *CompoundUnit) IsMulCancelable(other *CompoundUnit) bool {
+	if u.isNumDenSameDim() && other.isNumDenSameDim() {
+		// if num & den are same dimension
+		// consider it as non-cancelable,
+		// e.g., 1kg/kg * 1kg/kg should result 1kg/kg(not 1kg^2/kg^2 in strict math)
+		return false
+	}
+	a := u.Numerator.Dimension() == other.Denominator.Dimension()
+	b := u.Denominator.Dimension() == other.Numerator.Dimension()
+	return a && b
+}
+
+func (u *CompoundUnit) IsDivCancelable(other *CompoundUnit) bool {
+	a := u.Numerator.Dimension() == other.Numerator.Dimension()
+	b := u.Denominator.Dimension() == other.Denominator.Dimension()
+	return a && b
 }
 
 func MaybeAmbiguousUnitName(name string) (string, bool) {
@@ -196,7 +226,7 @@ func newStaticUintManager() UnitManager {
 	}
 
 	// permutations for dimensions to build compound units
-	dims := []Dimension{DimEnergy, DimMass, DimVolume, DimTime, DimLength}
+	dims := []Dimension{DimEnergy, DimMass, DimVolume, DimTime, DimLength, DimPopulation}
 	var arr []Dimension
 	var permutations [][]Dimension
 	// we only need permutation with length of 2
@@ -236,16 +266,10 @@ func permute(arr []Dimension, ans *[][]Dimension, dims []Dimension, depth int) {
 		*ans = append(*ans, dst)
 		return
 	}
-	m := make(map[Dimension]struct{})
-	for _, a := range arr {
-		m[a] = struct{}{}
-	}
 	for _, dim := range dims {
-		if _, ok := m[dim]; !ok {
-			arr = append(arr, dim)
-			permute(arr, ans, dims, depth)
-			arr = arr[:len(arr)-1]
-		}
+		arr = append(arr, dim)
+		permute(arr, ans, dims, depth)
+		arr = arr[:len(arr)-1]
 	}
 }
 

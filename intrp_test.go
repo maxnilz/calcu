@@ -31,7 +31,9 @@ a = CO2 * CH2 * (1 + 2);
 b = CO2 * CH2 * (1 - 2);
 c = CO2 * CH2 * 2/1;
 d = CO2 * CH2 * (2/1);
-print(CO2, CH2, N2O, GHG, a, b, c, d);
+e = CO2 * CH2 / (2/1);
+f = CO2 * CH2 / (2/1);
+print(CO2, CH2, N2O, GHG, a, b, c, d, e, f);
 `
 	vars := map[string]string{
 		"activity_value": "1(10^3m3)",
@@ -56,8 +58,12 @@ print(CO2, CH2, N2O, GHG, a, b, c, d);
 	b := outvars["b"]
 	c := outvars["c"]
 	d := outvars["d"]
-	gots := []string{co2.String(), ch2.String(), n2o.String(), ghg.String(), a.String(), b.String(), c.String(), d.String()}
-	expected := []string{"110kg", "7.2kg", "1100kg", "1217.2kg", "2376kg", "-792kg", "1584kg", "1584kg"}
+	e := outvars["e"]
+	f := outvars["f"]
+	gots := []string{co2.String(), ch2.String(), n2o.String(), ghg.String(),
+		a.String(), b.String(), c.String(), d.String(), e.String(), f.String()}
+	expected := []string{"110kg", "7.2kg", "1100kg", "1217.2kg",
+		"2376kg", "-792kg", "1584kg", "1584kg", "396kg", "396kg"}
 	if !reflect.DeepEqual(expected, gots) {
 		t.Fatalf("exptectd: %v, got: %v", expected, gots)
 	}
@@ -67,7 +73,8 @@ func TestInterpreterUnitless(t *testing.T) {
 	exprs := `
 CH4 = activity_value * FractionofGassyCoalMines * CH4Factor * CH4ConversionFactor;
 GHG = CH4;
-print(CH4, GHG);
+a = 1 * 1;
+print(CH4, GHG, a);
 `
 	vars := map[string]string{
 		"activity_value":           "30",
@@ -86,8 +93,9 @@ print(CH4, GHG);
 	}
 	ch4 := outvars["CH4"]
 	ghg := outvars["GHG"]
-	gots := []string{ch4.String(), ghg.String()}
-	expected := []string{"1326.6kg", "1326.6kg"}
+	a := outvars["a"]
+	gots := []string{ch4.String(), ghg.String(), a.String()}
+	expected := []string{"1326.6kg", "1326.6kg", "1"}
 	if !reflect.DeepEqual(expected, gots) {
 		t.Fatalf("exptectd: %v, got: %v", expected, gots)
 	}

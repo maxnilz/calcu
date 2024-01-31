@@ -125,10 +125,11 @@ func (mv *MeasureValue) toSi(mvUnit Unit) *MeasureValue {
 	siFactor, siOffset := mvUnit.SiFactors()
 	d := mv.value.Mul(siFactor)
 	d = d.Add(siOffset)
+	unitless := siName == ""
 	return &MeasureValue{
 		um:       mv.um,
 		unit:     siName,
-		unitless: false,
+		unitless: unitless,
 		value:    d,
 	}
 }
@@ -201,8 +202,9 @@ func (mv *MeasureValue) parseMul(other *MeasureValue) (*mvopstat, bool) {
 
 	// the support cases are:
 	//  1. both are meta unit, e.g., 1m * 1m = 1m (not 1m^2 in strict math)
-	//  2. both are compound unit, e.g., 1kg/m * 1kg/m = 1kg/m (not 1kg^2/m^2 in strict math)
-	//  3. one is meta another is compound, e.g., 1kg/m * 1m = 1kg
+	//  2. one is meta another is compound, e.g., 1kg/m * 1m = 1kg
+	//  3. both are compound unit, e.g., 1kg/m * 1kg/m = 1kg/m (not 1kg^2/m^2 in strict math)
+	//  4. both are compound unit and can be canceled, e.g., 1kg/m * 1m/kg = 1
 
 	u, ok := mv.um.GetByName(mv.unit)
 	if !ok {
@@ -226,11 +228,21 @@ func (mv *MeasureValue) parseMul(other *MeasureValue) (*mvopstat, bool) {
 			targetUnit: lmv.unit,
 		}, true
 	}
-	// if both are compound unit, compatible if:
+	// if both are compound unit, allowed if they are
+	// cancelable e.g. 1kg/m * 1m/kg = 1, otherwise
+	// compatible iff:
 	//  1. the dimension of Numerator same and
 	//  2. the dimension of Denominator is same
 	if !u.IsMeta() && !ou.IsMeta() {
 		cu1, cu2 := u.(*CompoundUnit), ou.(*CompoundUnit)
+		if cu1.IsMulCancelable(cu2) {
+			lmv, rmv := mv.toSi(u), other.toSi(ou)
+			return &mvopstat{
+				unitless: true,
+				lmv:      lmv,
+				rmv:      rmv,
+			}, true
+		}
 		if cu1.Numerator.Dimension() != cu2.Numerator.Dimension() {
 			return nil, false
 		}
@@ -303,8 +315,8 @@ func (mv *MeasureValue) parseDiv(other *MeasureValue) (*mvopstat, bool) {
 	// both are unit measured value onwards
 
 	// the support cases are:
-	//  1. both are meta unit, e.g., 1m / 1m = 1m (not 1 in strict math)
-	//  2. both are compound unit, e.g., 1kg/m / 1kg/m = 1kg/m (not 1 in strict math)
+	//  1. both are meta unit, e.g., 1m / 1m = 1
+	//  2. both are compound unit, e.g., 1kg/m / 1kg/m = 1
 
 	u, ok := mv.um.GetByName(mv.unit)
 	if !ok {
@@ -322,29 +334,25 @@ func (mv *MeasureValue) parseDiv(other *MeasureValue) (*mvopstat, bool) {
 		}
 		lmv, rmv := mv.toSi(u), other.toSi(ou)
 		return &mvopstat{
-			unitless:   false,
-			lmv:        lmv,
-			rmv:        rmv,
-			targetUnit: lmv.unit,
+			unitless: true,
+			lmv:      lmv,
+			rmv:      rmv,
 		}, true
 	}
-	// if both are compound unit, compatible if:
+	// if both are compound unit, compatible iff:
 	//  1. the dimension of Numerator same and
 	//  2. the dimension of Denominator is same
+	// e.g, they are cancelable, i.e., 1kg/m / 1kg/m = 1
 	if !u.IsMeta() && !ou.IsMeta() {
 		cu1, cu2 := u.(*CompoundUnit), ou.(*CompoundUnit)
-		if cu1.Numerator.Dimension() != cu2.Numerator.Dimension() {
-			return nil, false
-		}
-		if cu1.Denominator.Dimension() != cu2.Denominator.Dimension() {
+		if !cu1.IsDivCancelable(cu2) {
 			return nil, false
 		}
 		lmv, rmv := mv.toSi(u), other.toSi(ou)
 		return &mvopstat{
-			unitless:   false,
-			lmv:        lmv,
-			rmv:        rmv,
-			targetUnit: lmv.unit,
+			unitless: true,
+			lmv:      lmv,
+			rmv:      rmv,
 		}, true
 	}
 
